@@ -11,8 +11,10 @@ import pandas
 import tushare as ts
 
 import requests
+from jqdatasdk import finance, query
 
 from easyquant.easydealutils.time import get_all_trade_days
+from easyquant.models import SecurityInfo
 from easytrader.utils.misc import file2dict
 from pandas import DataFrame
 
@@ -52,9 +54,18 @@ class Quotation(metaclass=abc.ABCMeta):
         # return data.values.tolist()
         return get_all_trade_days()
 
-    def get_price(self, security: str, date):
-        df = self.get_bars(security, 1, unit='1d', end_dt=date, fields=['close', 'date'])
-        return df.close[0]
+    def get_price(self, security: str, date) -> float:
+        df = self.get_bars(security, 1, unit='1d', end_dt=date)
+        return df.close[-1]
+
+    def get_north_money(self, date):
+        return 0
+
+    def get_stock_info(self, security: str) -> SecurityInfo:
+        security = SecurityInfo()
+        security.code = security
+        security.name = security
+        return SecurityInfo
 
 
 def is_shanghai(stock_code):
@@ -70,11 +81,13 @@ def is_shanghai(stock_code):
                "132", "204", "5", "6", "9", "7")
     return stock_code.startswith(sh_head)
 
+
 def to_date_str(dt):
     if dt is None:
         return None
     if isinstance(dt, datetime.date) or isinstance(dt, datetime.datetime):
         return dt.strftime("%Y-%m-%d")
+
 
 class TushareQuotation(Quotation):
     """
@@ -110,7 +123,7 @@ class TushareQuotation(Quotation):
 
         df = ts.pro_bar(ts_code=self._format_code(security),
                         end_date=to_date_str(end_dt),
-                        freq=unit , # 只免费
+                        freq=unit,  # 只免费
                         asset='E',
                         limit=count)
         df.index = pandas.to_datetime(df["trade_date"])
@@ -140,6 +153,21 @@ class JQDataQuotation(Quotation):
     def _format_code(self, code: str) -> str:
         return "%s%s" % (code, self.get_stock_type(code))
 
+    def get_north_money(self, date):
+        n_sh = finance.run_query(query(finance.STK_ML_QUOTA).filter(finance.STK_ML_QUOTA.day <= date,
+                                                                    finance.STK_ML_QUOTA.link_id == 310001).order_by(
+            finance.STK_ML_QUOTA.day.desc()).limit(10))
+        n_sz = finance.run_query(query(finance.STK_ML_QUOTA).filter(finance.STK_ML_QUOTA.day <= date,
+                                                                    finance.STK_ML_QUOTA.link_id == 310002).order_by(
+            finance.STK_ML_QUOTA.day.desc()).limit(10))
+        total_net_in = 0
+        for i in range(0, 3):
+            sh_in = n_sh['buy_amount'][i] - n_sh['sell_amount'][i]
+            sz_in = n_sz['buy_amount'][i] - n_sz['sell_amount'][i]
+            amount = sh_in + sz_in
+            total_net_in += amount
+        return total_net_in
+
     def get_bars(self, security, count, unit='1d',
                  fields=['date', 'open', 'high', 'low', 'close', 'volume'],
                  include_now=True, end_dt=None) -> DataFrame:
@@ -149,6 +177,9 @@ class JQDataQuotation(Quotation):
             query_dt = datetime.datetime.strptime(query_dt, "%Y-%m-%d")
 
         query_dt += datetime.timedelta(days=1)
+
+        if 'date' not in fields:
+            fields.append('date')
 
         cache_key = self._get_cache_key(security, query_dt, unit)
 
@@ -164,7 +195,7 @@ class JQDataQuotation(Quotation):
             self.cache[cache_key] = df
             return df[df.index <= end_dt] if "m" in unit else df
 
-        df = jqdatasdk.get_bars(self._format_code(security), count,
+        df = jqdatasdk.get_bars(self._format_code(security), 10000,
                                 unit=unit,
                                 fields=fields,
                                 include_now=include_now,
@@ -179,6 +210,9 @@ class JQDataQuotation(Quotation):
 
         # 过滤数据
         return df[df.index <= end_dt] if "m" in unit else df
+
+    def get_stock_info(self, security: str):
+        return jqdatasdk.get_security_info(self._format_code(security))
 
 
 class FreeOnlineQuotation(Quotation):

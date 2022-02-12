@@ -11,3 +11,7 @@ easyquotation
 arrow
 tushare
 xlrd
+"python-jose[cryptography]"
+"passlib[bcrypt]"
+aiofiles
+python-multipart
