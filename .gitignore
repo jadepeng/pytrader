@@ -68,3 +68,7 @@ docs/_build/
 # PyBuilder
 target/
 vcode
+node_modules
+.DS_Store
+*.local
+dist

@@ -1,6 +1,30 @@
 import datetime
+from typing import List
 
 from easyquant.quotation import use_quotation
+
+
+def get_t_price(code: str):
+    df = quotation.get_bars(code, count=1, end_dt=datetime.datetime.now() - datetime.timedelta(days=1))
+
+    last = df[-1:]
+
+    high = last.high[0]
+    low = last.low[0]
+    close = last.close[0]
+    pivot = (high + low + close) / 3
+
+    r1 = 2 * pivot - low
+    r2 = pivot + (high - low)
+    s1 = 2 * pivot - high
+    s2 = pivot - (high - low)
+
+    return r1, r2, s1, s2
+
+
+def get_t_prices(codes: List[str]):
+    return [get_t_price(code) for code in codes]
+
 
 quotation = use_quotation('jqdata')
 codes = {
@@ -17,25 +41,8 @@ codes = {
     "600048": "保利"}
 
 for stock in codes.keys():
-    df = quotation.get_bars(stock, count=200, end_dt=datetime.datetime.now() - datetime.timedelta(days=1))
-
-    last = df[-1:]
-
-    high = last.high[0]
-    low = last.low[0]
-    close = last.close[0]
-    pivot = (high + low + close) / 3
-
-    r1 = 2 * pivot - low
-    r2 = pivot + (high - low)
-    s1 = 2 * pivot - high
-    s2 = pivot - (high - low)
+    r1, r2, s1, s2 = get_t_price(stock)
 
     print("%s %s : 阻力价格1 = %s, 阻力价格2 = %s, 支撑1 =%s , 支撑2 =%s" % (codes[stock], stock, r1, r2, s1, s2))
 
-# sSetup = pivot + (high - low)  # 观察卖出价 r2
-# sEnter = 2 * pivot - low  # 反转卖出价 r1
-# bSetup = pivot - (high - low)  # 观察买入价 s2
-# bEnter = 2 * pivot - high  # 反转买入价 s1
-#
-# print(pivot, sSetup, sEnter, bSetup, bEnter)
+

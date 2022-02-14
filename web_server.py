@@ -1,18 +1,22 @@
 import datetime
+import json
 from datetime import datetime, timedelta
 
 import uvicorn
 from fastapi import Depends, FastAPI, HTTPException, status, Path
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from jose import jwt, JWTError
 
 import easyquotation.api
 from easyquant.quotation import use_quotation
+from t import get_t_price
 from web.database import Database
 from web.db_service import DbService
 from web.dto import LoginRequest
+from web.models import User
 from web.settings import APISettings
-from web.user_service import User, Token, route_data, UserService
+from web.user_service import Token, route_data, UserService, oauth2_scheme, TokenData, UserModel
 
 SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
 ALGORITHM = "HS256"
@@ -38,6 +42,30 @@ app.add_middleware(
 app.mount("/static", StaticFiles(directory="web/static"), name="static")
 
 
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        token_data = TokenData(username=username)
+    except JWTError:
+        raise credentials_exception
+    user = user_service.get_user(username=token_data.username)
+    if user is None:
+        raise credentials_exception
+    return user
+
+
+async def get_current_active_user(current_user: User = Depends(get_current_user)):
+    return current_user
+
+
 @app.get("/")
 async def root():
     return db_service.get_watch_stocks('')
@@ -56,19 +84,21 @@ def watch_stock(code: str = Path(..., title="The stock code to watch")):
 
 @app.delete("/api/watch_stocks/{code}")
 def watch_stock(code: str = Path(..., title="The stock code to remove")):
-    dbitem = db_service.remove_stock(code)
+    db_item = db_service.remove_stock(code)
     return {
         'error': 0,
-        'data': dbitem
+        'data': db_item
     }
 
 
 @app.get("/api/stocks")
-async def get_stocks(current_user: User = Depends(user_service.get_current_active_user)):
+async def get_stocks(current_user: User = Depends(get_current_active_user)):
     stocks = db_service.get_watch_stocks(current_user.username)
     codes = [stock.code for stock in stocks]
     data = online_quotation.real(codes)
     data = list(data.values())
+    for stock in data:
+        stock['t_price'] = get_t_price(stock['code'])
     return data
 
 
@@ -88,13 +118,19 @@ async def login_for_access_token(login: LoginRequest):
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@app.get("/api/me/", response_model=User)
-async def read_users_me(current_user: User = Depends(user_service.get_current_active_user)):
-    return current_user
+@app.get("/api/me/", response_model=UserModel)
+async def read_users_me(current_user: User = Depends(get_current_active_user)):
+    user = UserModel(
+        email=current_user.email,
+        full_name=current_user.full_name,
+        roles=json.loads(current_user.roles),
+        username=current_user.username,
+        disabled=False)
+    return user
 
 
 @app.get("/api/route")
-async def read_user_routes(current_user: User = Depends(user_service.get_current_active_user)):
+async def read_user_routes(current_user: User = Depends(get_current_active_user)):
     assert current_user is not None
     return route_data
 
