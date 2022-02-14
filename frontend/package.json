@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",
-    "build": "vuedx-typecheck . && vite build",
+    "build": "vuedx-typecheck . && vite build --base=/static/",
     "preview": "vite preview",
     "test": "jest ./test",
     "eslint": "npx eslint . --ext .js,.jsx,.ts,.tsx --fix",

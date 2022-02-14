@@ -3,25 +3,43 @@ import json
 from datetime import datetime, timedelta
 
 import uvicorn
+from easytrader.webtrader import WebTrader
 from fastapi import Depends, FastAPI, HTTPException, status, Path
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from jose import jwt, JWTError
 from starlette.responses import RedirectResponse
 
+import easyquant
 import easyquotation.api
+from easyquant.log_handler.default_handler import DefaultLogHandler
 from easyquant.quotation import use_quotation
 from t import get_t_price
 from web.database import Database
 from web.db_service import DbService
-from web.dto import LoginRequest
+from web.dto import LoginRequest, BuyRequest
 from web.models import User
 from web.settings import APISettings
 from web.user_service import Token, route_data, UserService, oauth2_scheme, TokenData, UserModel
 
 # fix mimetypes error, default .js is text/plain
 import mimetypes
+
 mimetypes.add_type("application/javascript; charset=utf-8", ".js")
+
+# 东财
+broker = 'eastmoney'
+need_data = 'account.json'
+log_type = 'file'
+
+log_handler = DefaultLogHandler(name='测试', log_type=log_type, filepath='logs.log')
+engine = easyquant.MainEngine(broker,
+                              need_data,
+                              quotation='online',
+                              # 1分钟K线
+                              bar_type="1m",
+                              log_handler=log_handler)
+trader: WebTrader = engine.user
 
 SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
 ALGORITHM = "HS256"
@@ -74,6 +92,51 @@ async def get_current_active_user(current_user: User = Depends(get_current_user)
 @app.get("/")
 async def root():
     return RedirectResponse("/static/index.html")
+
+
+@app.get("/api/balance")
+def get_balance(current_user: User = Depends(get_current_active_user)):
+    return {
+        'error': 0,
+        'data': trader.get_balance()[0]
+    }
+
+
+@app.get("/api/position")
+def get_position(current_user: User = Depends(get_current_active_user)):
+    return {
+        'error': 0,
+        'data': trader.get_position()
+    }
+
+
+@app.get("/api/entrust")
+def get_entrust(current_user: User = Depends(get_current_active_user)):
+    return {
+        'error': 0,
+        'data': trader.get_entrust()
+    }
+
+@app.get("/api/deal")
+def get_current_deal(current_user: User = Depends(get_current_active_user)):
+    return {
+        'error': 0,
+        'data': trader.get_current_deal()
+    }
+
+
+@app.post("/api/buy")
+async def buy(request: BuyRequest, current_user: User = Depends(get_current_active_user)):
+    trader.buy(request.security, price=request.price, amount=request.amount, volume=request.volume,
+               entrust_prop=request.entrust_prop)
+    return {'error': 0}
+
+
+@app.post("/api/sell")
+async def buy(request: BuyRequest, ):
+    trader.sell(request.security, price=request.price, amount=request.amount, volume=request.volume,
+                entrust_prop=request.entrust_prop)
+    return {'error': 0}
 
 
 @app.post("/api/watch_stocks/{code}")

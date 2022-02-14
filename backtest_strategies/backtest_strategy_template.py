@@ -50,10 +50,8 @@ class BacktestStrategyTemplate:
                 position = singal
                 self.signals.append(singal)
 
-
     def get_singal(self, bars: DataFrame):
         return 0
-
 
     def get_scores(self, df: DataFrame):
         return 0

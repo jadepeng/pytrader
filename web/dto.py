@@ -1,3 +1,4 @@
+import intercept as intercept
 from pydantic import BaseModel
 
 
@@ -14,3 +15,19 @@ class TaskDTO(BaseModel):
 class LoginRequest(BaseModel):
     username: str
     password: str
+
+
+class BuyRequest(BaseModel):
+    security: str
+    price: float
+    amount: int = 0
+    volume: int = 0
+    entrust_prop: int = 0
+
+
+class SellRequest(BaseModel):
+    security: str
+    price: float
+    amount: int = 0
+    volume: int = 0
+    entrust_prop: int = 0

@@ -40,9 +40,9 @@ codes = {
     # "600900": "长电",
     "600048": "保利"}
 
-for stock in codes.keys():
-    r1, r2, s1, s2 = get_t_price(stock)
-
-    print("%s %s : 阻力价格1 = %s, 阻力价格2 = %s, 支撑1 =%s , 支撑2 =%s" % (codes[stock], stock, r1, r2, s1, s2))
-
-
+# for stock in codes.keys():
+#     r1, r2, s1, s2 = get_t_price(stock)
+#
+#     print("%s %s : 阻力价格1 = %s, 阻力价格2 = %s, 支撑1 =%s , 支撑2 =%s" % (codes[stock], stock, r1, r2, s1, s2))
+#
+#

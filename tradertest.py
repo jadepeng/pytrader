@@ -9,7 +9,8 @@ broker = 'eastmoney'
 # 自己准备
 # {
 #     "user": "",
-#     "password": ""# }
+#     "password": ""#
+# }
 need_data = 'account.json'
 
 log_type = 'file'

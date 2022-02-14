@@ -85,3 +85,46 @@ export function removeWatchStock(code:string): Promise<AxiosResponse<any>> {
         method: 'delete'
     })
 }
+
+export function get_balance(): Promise<AxiosResponse<any>> {
+    return request({
+        url: '/api/balance',
+        method: 'get'
+    })
+}
+
+export function get_position(): Promise<AxiosResponse<any>> {
+    return request({
+        url: '/api/position',
+        method: 'get'
+    })
+}
+
+export function get_entrust(): Promise<AxiosResponse<any>> {
+    return request({
+        url: '/api/entrust',
+        method: 'get'
+    })
+}
+
+export function get_current_deal(): Promise<AxiosResponse<any>> {
+    return request({
+        url: '/api/deal',
+        method: 'get'
+    })
+}
+
+export function buy(): Promise<AxiosResponse<any>> {
+    return request({
+        url: '/api/balance',
+        method: 'get'
+    })
+}
+
+
+export function sell(): Promise<AxiosResponse<any>> {
+    return request({
+        url: '/api/balance',
+        method: 'get'
+    })
+}

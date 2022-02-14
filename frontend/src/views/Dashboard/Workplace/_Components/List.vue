@@ -14,7 +14,7 @@
     <el-card shadow='hover' class='mb-2'>
         <template #header>
             <div class='card-header flex justify-between items-center'>
-                <span>我的关注</span>
+                <span>关注</span>
                 <div>
                     <el-link
                         type='primary'
