@@ -38,6 +38,7 @@ export default ({ command, mode }: ConfigEnv): UserConfigExport => {
             // sourcemap: true,
             manifest: true,
             rollupOptions: {
+                outDir: '../static',
                 output: {
                     manualChunks: {
                         'element-plus': ['element-plus'],

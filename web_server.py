@@ -7,6 +7,7 @@ from fastapi import Depends, FastAPI, HTTPException, status, Path
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from jose import jwt, JWTError
+from starlette.responses import RedirectResponse
 
 import easyquotation.api
 from easyquant.quotation import use_quotation
@@ -17,6 +18,10 @@ from web.dto import LoginRequest
 from web.models import User
 from web.settings import APISettings
 from web.user_service import Token, route_data, UserService, oauth2_scheme, TokenData, UserModel
+
+# fix mimetypes error, default .js is text/plain
+import mimetypes
+mimetypes.add_type("application/javascript; charset=utf-8", ".js")
 
 SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
 ALGORITHM = "HS256"
@@ -39,7 +44,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.mount("/static", StaticFiles(directory="web/static"), name="static")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
@@ -68,7 +73,7 @@ async def get_current_active_user(current_user: User = Depends(get_current_user)
 
 @app.get("/")
 async def root():
-    return db_service.get_watch_stocks('')
+    return RedirectResponse("/static/index.html")
 
 
 @app.post("/api/watch_stocks/{code}")
@@ -136,4 +141,4 @@ async def read_user_routes(current_user: User = Depends(get_current_active_user)
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="127.0.0.1", port=8000)
