@@ -1,7 +1,7 @@
 from typing import List
 
 from web.database import Database
-from web.models import WatchStocks, User
+from web.models import WatchStocks, User, Strategies
 from web.settings import APISettings
 
 
@@ -52,4 +52,26 @@ class DbService:
             db_item.email = 'admin@example.com'
             session.add(db_item)
             session.commit()
+        return db_item
+
+    def list_strategies(self) -> List[Strategies]:
+        session = self.database.get_session()
+        return session.query(Strategies).all()
+
+    def add_strategy(self, name: str, code: str):
+        session = self.database.get_session()
+        db_item = Strategies()
+        db_item.name = name
+        db_item.code = code
+        session.add(db_item)
+        session.commit()
+        return db_item
+
+    def update_strategy(self, id: int, name: str, code: str):
+        session = self.database.get_session()
+        db_item = session.query(Strategies).filter(Strategies.id == id).first()
+        db_item.name = name
+        db_item.code = code
+        session.update(db_item)
+        session.commit()
         return db_item

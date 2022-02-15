@@ -109,54 +109,6 @@ class MainEngine:
         self.clock_engine.start()
         self._add_main_shutdown(self.clock_engine.stop)
 
-    def start_mock(self, start_date: str, end_date: str, strategy: StrategyTemplate):
-        """ 启动回测 """
-        self.user.set_quotation(self.quotation)
-        start_date_time = datetime.strptime(start_date, '%Y-%m-%d')
-        end_date_time = datetime.strptime(end_date, '%Y-%m-%d')
-
-        current_dt = start_date_time
-
-        while current_dt <= end_date_time:
-
-            if not self.context.is_trade_date(current_dt.strftime("%Y-%m-%d")):
-                current_dt = current_dt + timedelta(days=1)
-                continue
-
-            # TODO 待优化
-            self.context.user.set_time(current_dt)
-            # open
-            self.context.change_dt(current_dt + timedelta(hours=9, minutes=30))
-            strategy.on_open(self.context)
-
-            self.mock_quotation(current_dt, strategy)
-
-            self.context.change_dt(current_dt + timedelta(hours=15, minutes=30))
-            strategy.on_close(self.context)
-
-            current_dt = current_dt + timedelta(days=1)
-
-    def mock_quotation(self, end_date: datetime, strategy: StrategyTemplate):
-
-        current_time = end_date + timedelta(hours=9, minutes=30)
-        end_date = end_date + timedelta(hours=15)
-
-        if "m" in self.bar_type:
-            minute = int(self.bar_type.replace("m", ""))
-            # 9点半开始
-            while current_time <= end_date:
-                self.context.change_dt(current_time)
-                # 更新
-                strategy.on_bar(self.context, self.quotation_engine.fetch_quotation(end_date=current_time))
-                current_time += timedelta(minutes=minute)
-        else:
-            # day = int
-            self.context.change_dt(end_date)
-            quotation_data = self.quotation_engine.fetch_quotation(end_date=end_date)
-            self.user.update_balance(quotation_data)
-            # 更新持仓
-            strategy.on_bar(self.context, quotation_data)
-
     def load(self, names, strategy_file):
         with self.lock:
             mtime = os.path.getmtime(os.path.join('strategies', strategy_file))

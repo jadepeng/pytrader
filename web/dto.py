@@ -17,6 +17,11 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class StrategyModel(BaseModel):
+    name: str
+    code: str
+
+
 class BuyRequest(BaseModel):
     security: str
     price: float

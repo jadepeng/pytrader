@@ -17,7 +17,7 @@ from easyquant.quotation import use_quotation
 from t import get_t_price
 from web.database import Database
 from web.db_service import DbService
-from web.dto import LoginRequest, BuyRequest
+from web.dto import LoginRequest, BuyRequest, StrategyModel
 from web.models import User
 from web.settings import APISettings
 from web.user_service import Token, route_data, UserService, oauth2_scheme, TokenData, UserModel
@@ -117,6 +117,7 @@ def get_entrust(current_user: User = Depends(get_current_active_user)):
         'data': trader.get_entrust()
     }
 
+
 @app.get("/api/deal")
 def get_current_deal(current_user: User = Depends(get_current_active_user)):
     return {
@@ -151,7 +152,7 @@ def watch_stock(code: str = Path(..., title="The stock code to watch")):
 
 
 @app.delete("/api/watch_stocks/{code}")
-def watch_stock(code: str = Path(..., title="The stock code to remove")):
+def delete_watch_stock(code: str = Path(..., title="The stock code to remove")):
     db_item = db_service.remove_stock(code)
     return {
         'error': 0,
@@ -168,6 +169,30 @@ async def get_stocks(current_user: User = Depends(get_current_active_user)):
     for stock in data:
         stock['t_price'] = get_t_price(stock['code'])
     return data
+
+
+@app.get("/api/strategies")
+async def list_strategies():
+    return {
+        'error': 0,
+        'data': db_service.list_strategies()
+    }
+
+
+@app.post("/api/strategies")
+def add_strategy(model: StrategyModel):
+    return {
+        'error': 0,
+        'data': db_service.add_strategy(model.name, model.code)
+    }
+
+
+@app.put("/api/strategies/{id}")
+def update_strategy(model: StrategyModel, id: int = Path(..., title="strategy id")):
+    return {
+        'error': 0,
+        'data': db_service.update_strategy(id, model.name, model.code)
+    }
 
 
 @app.post("/api/login", response_model=Token)
