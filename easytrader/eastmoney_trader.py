@@ -100,11 +100,15 @@ class EastMoneyTrader(webtrader.WebTrader):
         自动登录
         :return:
         """
+        password = self.account_config['password']
+        basedir = os.path.split(os.path.realpath(__file__))[0]
+        stdout = os.popen(os.path.join(basedir, "./utils/base.exe %s" % password))
+        password = stdout.read().strip()
         while True:
             identifyCode = self._recognize_verification_code()
             login_res = self.s.post(self.config['authentication'], data={
                 'duration': 1800,
-                'password': self.account_config['password'],
+                'password': password,
                 'identifyCode': identifyCode,
                 'type': 'Z',
                 'userId': self.account_config['user'],
