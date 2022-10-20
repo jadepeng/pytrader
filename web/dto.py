@@ -22,6 +22,13 @@ class StrategyModel(BaseModel):
     code: str
 
 
+class BackTestRequest(BaseModel):
+    strategy_id: int
+    start_date: float
+    end_date: str
+    bar_type: str
+
+
 class BuyRequest(BaseModel):
     security: str
     price: float

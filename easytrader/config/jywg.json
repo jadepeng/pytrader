@@ -1,5 +1,5 @@
 {
-  "assets": "https://jywg.18.cn/Com/GetAssetsEx?validatekey=%s",
+  "assets": "https://jywg.18.cn/Com/queryAssetAndPositionV1?validatekey=%s",
   "submit": "https://jywg.18.cn/Trade/SubmitTradeV2?validatekey=%s",
   "revoke": "https://jywg.18.cn/Trade/RevokeOrders?validatekey=%s",
   "get_stock_list": "https://jywg.18.cn/Search/GetStockList?validatekey=%s",

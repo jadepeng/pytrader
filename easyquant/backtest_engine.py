@@ -22,6 +22,22 @@ if (PY_MAJOR_VERSION, PY_MINOR_VERSION) < (3, 5):
     raise Exception('Python 版本需要 3.5 或以上, 当前版本为 %s.%s 请升级 Python' % (PY_MAJOR_VERSION, PY_MINOR_VERSION))
 
 
+class PositionLog(object):
+    amount = "0股"
+    avgCost = ""
+    dailyGains = ""
+    date = "2021-12-08"
+    gain = ""
+    gainPercentStr = ""
+    holdCost = ""
+    margin = ""
+    price = ""
+    security = ""
+    todayAmount = ""
+    totalValue = 0
+    value = 17.52
+
+
 class BackTestEngine:
     """回测引擎"""
 
@@ -62,6 +78,7 @@ class BackTestEngine:
             # 捕获退出信号后的要调用的,唯一的 shutdown 接口
             signal.signal(s, self.shutdown)
 
+        self.records = []
         self.log.info('启动回测引擎')
 
     def start(self):
@@ -73,7 +90,7 @@ class BackTestEngine:
         current_dt = start_date_time
 
         while current_dt <= end_date_time:
-
+            # 交易日
             if not self.context.is_trade_date(current_dt.strftime("%Y-%m-%d")):
                 current_dt = current_dt + timedelta(days=1)
                 continue
@@ -90,6 +107,9 @@ class BackTestEngine:
             self.strategy.on_close(self.context)
 
             current_dt = current_dt + timedelta(days=1)
+            # 记录交易
+
+            self.user.get_balance()
 
     def mock_quotation(self, end_date: datetime, strategy: StrategyTemplate):
 

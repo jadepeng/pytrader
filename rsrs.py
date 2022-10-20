@@ -156,8 +156,8 @@ def get_payments(stock_code, days, slop_days=18, M=400, MA=10,buy_sail = 0.7, sa
                                                                                             stock_price[stock_code + "策略"][
         -1]))
 
-get_payments('002230', days, slop_days=10, M=200, MA=1, buy_sail = 0.8, sail_score = -0.9 )
-# get_max_args('002230', days, slop_days=18, M=600, MA=10,buy_sail = 0.7, sail_score = -1.4 )
+# get_payments('002230', days, slop_days=10, M=200, MA=1, buy_sail = 0.8, sail_score = -0.9 )
+get_payments('002230', days, slop_days=18, M=600, MA=10,buy_sail = 0.8, sail_score = -1.4 )
 # get_max_args('002230', days, slop_days=18, M=600, MA=10,buy_sail = 0.6, sail_score = -1.4 )
 # get_max_args('002230', days, slop_days=18, M=600, MA=10,buy_sail = 0.5, sail_score = -1.4 )
 # get_max_args('002230', days, slop_days=18, M=600, MA=10,buy_sail = 0.4, sail_score = -1.4 )
