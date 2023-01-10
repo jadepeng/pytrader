@@ -1,22 +1,34 @@
 # -*- coding: utf-8 -*-
+import base64
 import json
 import numbers
 import os
 import pickle
-import re
-import time
 import random
+import time
 from typing import List
 
+import ddddocr
 import requests
 
 from easytrader import exceptions, webtrader
 from easytrader.log import logger
 from easytrader.model import Balance, Position, Entrust, Deal
-from easytrader.utils.misc import parse_cookies_str
 
-import ddddocr
+public_key = '-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDHdsyxT66pDG4p73yope7jxA92\nc0AT4qIJ' \
+            '/xtbBcHkFPK77upnsfDTJiVEuQDH+MiMeb+XhCLNKZGp0yaUU6GlxZdp\n+nLW8b7Kmijr3iepaDhcbVTsYBWchaWUXauj9Lrhz58' \
+            '/6AE/NF0aMolxIGpsi+ST\n2hSHPu3GSXMdhPCkWQIDAQAB\n-----END PUBLIC KEY----- '
 
+import base64
+from Crypto.PublicKey import RSA
+from Crypto.Cipher import PKCS1_v1_5 as Cipher_pkcs1_v1_5
+
+def encrypt_data(pwd):
+    rsakey = RSA.importKey(public_key)
+    cipher = Cipher_pkcs1_v1_5.new(rsakey)
+    cipher_text = base64.b64encode(cipher.encrypt(pwd.encode(encoding="utf-8")))
+    value = cipher_text.decode('utf8')
+    return value
 
 class EastMoneyTrader(webtrader.WebTrader):
     config_path = os.path.dirname(__file__) + "/config/jywg.json"
@@ -32,7 +44,7 @@ class EastMoneyTrader(webtrader.WebTrader):
         "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8,zh-TW;q=0.7",
         "Cache-Control": "no-cache",
         "Referer": "https://jywg.18.cn/Login?el=1&clear=1",
-        # "X-Requested-With": "XMLHttpRequest",
+        "X-Requested-With": "XMLHttpRequest",
     }
 
     random_number = '0.9033461201665647898'
@@ -47,8 +59,6 @@ class EastMoneyTrader(webtrader.WebTrader):
         )
         if not isinstance(self.multiple, numbers.Number):
             raise TypeError("initial assets must be number(int, float)")
-        if self.multiple < 1e3:
-            raise ValueError("雪球初始资产不能小于1000元，当前预设值 {}".format(self.multiple))
 
         if not self._reload_session():
             self.s = requests.Session()
@@ -59,7 +69,7 @@ class EastMoneyTrader(webtrader.WebTrader):
 
     def _recognize_verification_code(self):
         ocr = ddddocr.DdddOcr()
-        self.random_number = '0.903%d' % random.randint(100000, 900000)
+        self.random_number = '0.305%d' % random.randint(100000, 900000)
         req = self.s.get("%s%s" % (self.config['yzm'], self.random_number))
         code = ocr.classification(req.content)
         if len(code) == 4:
@@ -100,19 +110,24 @@ class EastMoneyTrader(webtrader.WebTrader):
         自动登录
         :return:
         """
-        password = self.account_config['password']
-        basedir = os.path.split(os.path.realpath(__file__))[0]
-        stdout = os.popen(os.path.join(basedir, "./utils/base.exe %s" % password))
-        password = stdout.read().strip()
         while True:
-            identifyCode = self._recognize_verification_code()
+            password = self.account_config['password']
+            password = encrypt_data(password)
+            identify_code = self._recognize_verification_code()
+            sec_info = self.s.get(f'http://127.0.0.1:18888/api/verifyUserInfo?{identify_code}').json()
+            self.s.headers.update({
+                "gw_reqtimestamp": str(int(round(time.time() * 1000))),
+                "content-type": "application/x-www-form-urlencoded"
+            })
             login_res = self.s.post(self.config['authentication'], data={
                 'duration': 1800,
                 'password': password,
-                'identifyCode': identifyCode,
+                'identifyCode': identify_code,
                 'type': 'Z',
                 'userId': self.account_config['user'],
                 'randNumber': self.random_number,
+                'authCode': '',
+                'secInfo': sec_info['userInfo']
             }).json()
 
             if login_res['Status'] != 0:

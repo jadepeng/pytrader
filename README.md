@@ -4,6 +4,12 @@
 
 支持东方财富自动交易
 
+## 安装
+
+    pip3 install -r requirements.txt
+
+- 手动安装`talib`依赖, [talib](https://www.lfd.uci.edu/~gohlke/pythonlibs/#ta-lib)
+
 ## web 系统
 
 新增web，可以设置关注的股票，显示T操作价格

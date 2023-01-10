@@ -5,7 +5,7 @@
   "get_stock_list": "https://jywg.18.cn/Search/GetStockList?validatekey=%s",
   "get_orders_data": "https://jywg.18.cn/Search/GetOrdersData?validatekey=%s",
   "get_deal_data": "https://jywg.18.cn/Search/GetDealData?validatekey=%s",
-  "authentication": "https://jywg.18.cn/Login/Authentication",
+  "authentication": "https://jywg.18.cn/Login/Authentication?validatekey=",
   "yzm": "https://jywg.18.cn/Login/YZM?randNum=",
   "prefix" : "",
   "authentication_check": "https://jywg.18.cn/Trade/Buy",

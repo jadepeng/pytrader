@@ -8,12 +8,8 @@ plt.rcParams['axes.unicode_minus'] = False  # 用来正常显示负号
 
 import pandas as pd
 import datetime
-import jqdatasdk as jq
-from easytrader.utils.misc import file2dict
 
-config = file2dict('jqdata.json')
-jq.auth(config["user"], config["password"])
-quotation = use_quotation('jqdata')
+quotation = use_quotation('tushare')
 
 date = pd.to_datetime(datetime.date.today())
 if date.dayofweek + 1 in [6, 7]:  # 剔除周末的日期，避免混淆
@@ -129,10 +125,10 @@ plt.show()
 
 # slop_days=17, M=200, MA=0,buy_score = 0.9, sail_score = -1.3 use_ma:0 收益率: 2.2461242244347384
 # slop_days=10, M=200, MA=10,buy_score = 1.0, sail_score = -1.2 基准收益率: 1.6168427594779367 收益率: 2.257659818289085
-#slop_days=10, M=200, MA=10,buy_score = 0.9, sail_score = -1.2
+# slop_days=10, M=200, MA=10,buy_score = 0.9, sail_score = -1.2
 # slop_days=10, M=250, MA=1,buy_score = 0.6, sail_score = -1.5 use_ma:0 基准收益率: 1.3719224724986905 收益率: 1.3719224724986916
 
-# get_max_args('002230', 600, 10, 250, 1, 0.9, -1.5, 0)
+get_max_args('002230', 600, 10, 250, 1, 0.9, -1.5, 0)
 
 # slop_days=17, M=200, MA=1,buy_score = 1.0, sail_score = -1.4 use_ma:0 基准收益率: 1.652887346165983 收益率: 2.3299197792940176
 # slop_days=17, M=200, MA=1,buy_score = 1.0, sail_score = -1.3 use_ma:0 基准收益率: 1.652887346165983 收益率: 2.4466786338581996

@@ -1,11 +1,7 @@
 # coding:utf-8
-import sys
-import traceback
-from typing import Dict
-from easyquant.quotation import use_quotation
 
-from pandas import DataFrame
 import matplotlib.pyplot as plt
+from pandas import DataFrame
 
 
 # 策略 尾盘根据K线数据买卖

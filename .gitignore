@@ -73,3 +73,5 @@ node_modules
 *.local
 dist
 *.db
+tushare.json
+pytrader.db
