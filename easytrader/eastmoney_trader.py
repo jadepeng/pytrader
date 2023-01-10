@@ -35,7 +35,7 @@ class EastMoneyTrader(webtrader.WebTrader):
     validate_key = None
 
     _HEADERS = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36",
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/536.66",
         "Host": "jywg.18.cn",
         "Pragma": "no-cache",
         "Connection": "keep-alive",
@@ -114,7 +114,9 @@ class EastMoneyTrader(webtrader.WebTrader):
             password = self.account_config['password']
             password = encrypt_data(password)
             identify_code = self._recognize_verification_code()
-            sec_info = self.s.get(f'http://127.0.0.1:18888/api/verifyUserInfo?{identify_code}').json()
+            # sec_info = self.s.get(f'http://127.0.0.1:18888/api/verifyUserInfo?{identify_code}').json()
+            # sec_info = sec_info['userInfo']
+            sec_info = ''
             self.s.headers.update({
                 "gw_reqtimestamp": str(int(round(time.time() * 1000))),
                 "content-type": "application/x-www-form-urlencoded"
@@ -127,7 +129,7 @@ class EastMoneyTrader(webtrader.WebTrader):
                 'userId': self.account_config['user'],
                 'randNumber': self.random_number,
                 'authCode': '',
-                'secInfo': sec_info['userInfo']
+                'secInfo': sec_info
             }).json()
 
             if login_res['Status'] != 0:
