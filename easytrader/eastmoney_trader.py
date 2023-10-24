@@ -355,7 +355,7 @@ class EastMoneyTrader(webtrader.WebTrader):
         balance = self.get_balance()[0]
         if not volume:
             volume = int(float(price) * amount)  # 可能要取整数
-        if balance.current_balance < volume and entrust_bs == "B":
+        if balance.enable_balance < volume and entrust_bs == "B":
             raise exceptions.TradeError(u"没有足够的现金进行操作")
         if amount == 0:
             raise exceptions.TradeError(u"数量不能为0")
