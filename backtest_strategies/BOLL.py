@@ -7,7 +7,7 @@ from backtest_strategies.backtest_strategy_template import BacktestStrategyTempl
 class BOLLStrategy(BacktestStrategyTemplate):
     """BOLL指标策略"""
 
-    def get_singal(self, df: DataFrame):
+    def get_signal(self, df: DataFrame):
         upper, middle, lower = self.get_boll(df)
          # 获取最新价格
         current_price = df.close[-1]

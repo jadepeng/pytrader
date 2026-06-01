@@ -1,4 +1,5 @@
 import importlib
+import os
 
 _modules = {}
 custom_folder = 'custom_strategies'
@@ -16,9 +17,9 @@ def load_strategy_class(code: str, name: str):
     :param name:
     :return:
     """
-    with open(custom_folder + "/" + name + ".py", 'w', encoding='utf8') as file:
+    strategy_path = os.path.join(custom_folder, f"{name}.py")
+    with open(strategy_path, 'w', encoding='utf8') as file:
         file.write(code)
-        file.close()
 
     if name in _modules:
         strategy_module = _modules.get(name)
@@ -30,6 +31,9 @@ def load_strategy_class(code: str, name: str):
 
 
 if __name__ == '__main__':
-    code = open('strategies/example.py', encoding='utf8').read()
+    example_path = os.path.join('strategies', 'example.py')
+    with open(example_path, 'r', encoding='utf8') as f:
+        code = f.read()
     strategy_module_cls = load_strategy_class(code, 'test')
     print(strategy_module_cls)
+

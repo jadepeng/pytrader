@@ -6,7 +6,7 @@ from backtest_strategies.backtest_strategy_template import BacktestStrategyTempl
 
 class CCIStrategy(BacktestStrategyTemplate):
 
-    def get_singal(self, df: DataFrame):
+    def get_signal(self, df: DataFrame):
         cci = self.get_scores(df)
         last_cci = cci[-1]
         previous_cci = cci[-2]

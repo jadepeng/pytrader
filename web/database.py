@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -10,7 +11,9 @@ class Database:
             SQLALCHEMY_DATABASE_URL, pool_pre_ping=True
         )
 
-        self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
+        self.SessionLocal = sessionmaker(
+            autocommit=False, autoflush=False, expire_on_commit=False, bind=self.engine
+        )
 
     def get_db(self):
         db = self.SessionLocal()
@@ -19,13 +22,26 @@ class Database:
         finally:
             db.close()
 
+    @contextmanager
+    def session_scope(self):
+        """Provide a transactional scope around a series of operations."""
+        session = self.SessionLocal()
+        try:
+            yield session
+            session.commit()
+        except Exception:
+            session.rollback()
+            raise
+        finally:
+            session.close()
+
     def get_session(self):
-        return next(self.get_db())
+        return self.SessionLocal()
 
     def execute_sql(self, statement):
         with self.engine.connect() as conn:
-            conn.execute(statement)  # 返回值为ResultProxy类型
-            conn.close()
+            conn.execute(statement)
 
 
 Base = declarative_base()
+

@@ -1,4 +1,3 @@
-import datetime
 import json
 from datetime import datetime, timedelta
 
@@ -134,7 +133,7 @@ async def buy(request: BuyRequest, current_user: User = Depends(get_current_acti
 
 
 @app.post("/api/sell")
-async def buy(request: BuyRequest, ):
+async def sell(request: BuyRequest, current_user: User = Depends(get_current_active_user)):
     trader.sell(request.security, price=request.price, amount=request.amount, volume=request.volume,
                 entrust_prop=request.entrust_prop)
     return {'error': 0}

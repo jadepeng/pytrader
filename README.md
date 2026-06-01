@@ -1,8 +1,8 @@
 # pytrader
 
-基于 [easytrader](https://github.com/shidenggui/easytrader) 和 [easyquotation](https://github.com/shidenggui/easyquotation) 的量化交易框架
+[English README](README_EN.md) | [中文说明](README.md)
 
-支持东方财富自动交易
+基于 [easytrader](https://github.com/shidenggui/easytrader) 和 [easyquotation](https://github.com/shidenggui/easyquotation) 的量化交易框架，支持东方财富自动交易。
 
 ## 当前维护计划
 
@@ -43,9 +43,12 @@
 
 - 手动安装`talib`依赖, [talib](https://www.lfd.uci.edu/~gohlke/pythonlibs/#ta-lib)
 
-## web 系统
+## Web 系统与 API 服务
 
-新增web，可以设置关注的股票，显示T操作价格
+本项目提供了一个配套的 Web 前端和 API 服务，用于实时监控自选股状态及进行 T 操作定价。
+
+- **自选股监控**：支持自选股添加与剔除，通过 QQ 行情接口提供实时报价。
+- **自动交易接口**：集成买入 `/api/buy` 与卖出 `/api/sell` API，并已严格引入 JWT 身份鉴权以确保交易安全。
 
 ![关注的股票](doc/watch_stock.png)
 

@@ -7,7 +7,7 @@ from backtest_strategies.backtest_strategy_template import BacktestStrategyTempl
 class MACDStrategy(BacktestStrategyTemplate):
     """MACD指标策略"""
 
-    def get_singal(self, df: DataFrame):
+    def get_signal(self, df: DataFrame):
         macd_raw, signal, hist  = self.get_score(df)
 
         macd = macd_raw[-1] - signal[-1]

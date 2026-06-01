@@ -12,7 +12,7 @@ class RSIStrategy(BacktestStrategyTemplate):
     # 卖出线
     upper_rsi = 65
 
-    def get_singal(self, df: DataFrame):
+    def get_signal(self, df: DataFrame):
         rsi = self.get_scores(df)[-1]
         if rsi < self.lower_rsi:
             return 1

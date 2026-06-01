@@ -16,7 +16,7 @@ class BacktestStrategyTemplate:
         self.signals = []
 
     def output_earning_rate(self):
-        df = self.bars[-self.days:]
+        df = self.bars[-self.days:].copy()
         df["signals"] = self.signals
         df["strategy"] = (1 + df.close.pct_change(1).fillna(0) * self.signals).cumprod()
         df["base"] = df['close'] / df['close'][0]
@@ -38,16 +38,22 @@ class BacktestStrategyTemplate:
         position = 0
         for i in range(self.days):
             # 当前的持仓，是上一天的信号
-            singal = self.get_singal(self.bars[:-self.days + i - 1])
-            if singal == -1:
+            # 修复原本多减去1导致决策时漏掉最靠近的那根K线的 Bug
+            signal = self.get_signal(self.bars[:-self.days + i])
+            if signal == -1:
                 # 保持不变
                 self.signals.append(position)
             else:
-                position = singal
-                self.signals.append(singal)
+                position = signal
+                self.signals.append(signal)
 
     def get_singal(self, bars: DataFrame):
+        """兼容老旧代码的错误拼写"""
+        return self.get_signal(bars)
+
+    def get_signal(self, bars: DataFrame):
         return 0
 
     def get_scores(self, df: DataFrame):
         return 0
+
